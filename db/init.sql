@@ -1,16 +1,38 @@
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS transactions (
   id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL,
   type VARCHAR(10) NOT NULL CHECK (type IN ('income','expense')),
   amount INT NOT NULL,
   category VARCHAR(50) NOT NULL,
+  account VARCHAR(50),
   note TEXT,
   date DATE NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS savings_plans (
   id SERIAL PRIMARY KEY,
-  username VARCHAR(50) UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
+  user_id INT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  target_amount INT NOT NULL,
+  current_amount INT DEFAULT 0,
+  target_date DATE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS bills (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  amount INT NOT NULL,
+  due_date DATE NOT NULL,
+  is_paid BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
