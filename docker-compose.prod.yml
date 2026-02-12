@@ -43,7 +43,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "80:80"
+      - "1292:1292"
     networks:
       - app_network
 
