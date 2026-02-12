@@ -24,7 +24,6 @@
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
 }
 
-/* Auth Styles */
 .auth-container {
   display: flex;
   justify-content: center;
@@ -83,13 +82,11 @@ body {
   color: var(--text-primary);
 }
 
-/* Layout */
 .layout {
   display: flex;
   min-height: 100vh;
 }
 
-/* Sidebar */
 .sidebar {
   width: var(--sidebar-width);
   background: var(--card-bg);
@@ -190,10 +187,8 @@ body {
 #monthSelect {
   flex: 3;
   min-width: 150px;
-  /* Ensure minimum width */
 }
 
-/* Content */
 .content {
   flex: 1;
   padding: 30px;
@@ -201,7 +196,6 @@ body {
   max-height: 100vh;
 }
 
-/* Topbar */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -241,7 +235,6 @@ body {
   font-size: 14px;
 }
 
-/* Grids */
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -257,7 +250,6 @@ body {
   margin-bottom: 24px;
 }
 
-/* Card */
 .card {
   background: var(--card-bg);
   border-radius: 20px;
@@ -300,17 +292,14 @@ body {
   color: var(--danger-color);
 }
 
-/* Toggle Switch */
 .toggle-container {
   display: flex;
   width: 100%;
-  /* Full Width */
   background: var(--input-bg);
   border-radius: 10px;
   padding: 4px;
   border: 1px solid var(--border-color);
   align-items: center;
-  /* Ensure vertical alignment */
   position: relative;
   cursor: pointer;
   user-select: none;
@@ -331,15 +320,11 @@ body {
   font-weight: 500;
   transition: 0.3s;
   display: flex;
-  /* Flexbase for centering */
   justify-content: center;
   align-items: center;
   height: 48px;
-  /* Fixed height for consistency */
   border-radius: 8px;
-  /* Match input radius */
   margin: 0;
-  /* Remove default margins if any */
 }
 
 .toggle-container input:checked+label {
@@ -348,30 +333,24 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Ensure topbar-left aligns items vertically in center */
 .topbar-left {
   display: flex;
   align-items: center;
   gap: 15px;
-  /* Consistent gap */
 }
 
-/* Type Toggle Active States with Background */
 #type-income:checked+label {
   background: rgba(16, 185, 129, 0.15);
-  /* Soft Green Background */
   color: var(--primary-color);
   border: 1px solid var(--primary-color);
 }
 
 #type-expense:checked+label {
   background: rgba(239, 68, 68, 0.15);
-  /* Soft Red Background */
   color: var(--danger-color);
   border: 1px solid var(--danger-color);
 }
 
-/* Forms */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -408,17 +387,14 @@ select:focus {
 
 i.calendar-controls select {
   padding: 8px 30px 8px 12px;
-  /* Extra padding right for the arrow */
   border-radius: 10px;
   border: 1px solid var(--border-color);
   background: var(--bg-color);
   color: var(--text-primary);
   appearance: none;
-  /* Remove default arrow to control styling if preferred, or just rely on padding */
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239ca3af%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
   background-repeat: no-repeat;
   background-position: right 15px top 50%;
-  /* Moved more to the left (from 10px to 15px) */
   background-size: 12px auto;
 }
 
@@ -452,7 +428,6 @@ i.calendar-controls select {
   color: var(--text-primary);
 }
 
-/* Calendar */
 .calendar-controls {
   display: flex;
   gap: 8px;
@@ -498,7 +473,6 @@ i.calendar-controls select {
   color: white;
 }
 
-/* Chart */
 .chart-container {
   position: relative;
   height: 250px;
@@ -507,7 +481,6 @@ i.calendar-controls select {
   justify-content: center;
 }
 
-/* Transactions List */
 .tx-list {
   list-style: none;
   max-height: 400px;

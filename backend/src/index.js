@@ -14,7 +14,7 @@ console.log("DEBUG: DB Config:", {
   user: process.env.DB_USER,
   passType: typeof process.env.DB_PASS,
   passExists: !!process.env.DB_PASS,
-  passVal: process.env.DB_PASS // temporary for debugging
+  passVal: process.env.DB_PASS
 });
 
 const pool = new Pool({
@@ -25,7 +25,6 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
-// Auto-migration for new tables
 (async () => {
   try {
     await pool.query(`
@@ -115,7 +114,6 @@ app.post("/login", async (req, res) => {
     const user = result.rows[0];
     console.log("DEBUG: User found:", { id: user.id, username: user.username, hasPassword: !!user.password, hasPasswordHash: !!user.password_hash });
 
-    // Use password_hash (preferred) or fallback to password
     const storedHash = user.password_hash || user.password;
 
     if (!storedHash) {
@@ -202,7 +200,6 @@ app.get("/summary", authMiddleware, async (req, res) => {
   }
 });
 
-/* --- SAVINGS ENDPOINTS --- */
 app.get("/savings", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.user_id;
@@ -235,7 +232,6 @@ app.put("/savings/:id/add", authMiddleware, async (req, res) => {
     const planId = req.params.id;
     const userId = req.user.user_id;
 
-    // Verify ownership
     const plan = await pool.query("SELECT * FROM savings_plans WHERE id=$1 AND user_id=$2", [planId, userId]);
     if (plan.rows.length === 0) return res.status(404).json({ error: "Plan not found" });
 
@@ -262,7 +258,6 @@ app.delete("/savings/:id", authMiddleware, async (req, res) => {
   }
 });
 
-/* --- BILLS ENDPOINTS --- */
 app.get("/bills", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.user_id;
@@ -291,7 +286,7 @@ app.post("/bills", authMiddleware, async (req, res) => {
 
 app.put("/bills/:id/pay", authMiddleware, async (req, res) => {
   try {
-    const { is_paid } = req.body; // true or false
+    const { is_paid } = req.body;
     const billId = req.params.id;
     const userId = req.user.user_id;
 

@@ -1,4 +1,3 @@
-// Reuse shared redirect
 if (!localStorage.getItem("token")) {
     window.location.href = "login.html";
 }
@@ -8,7 +7,6 @@ document.getElementById("resetDataBtn").addEventListener("click", async () => {
         return;
     }
 
-    // Double confirmation
     if (!confirm("Final Confirmation: Really delete everything? This cannot be undone.")) {
         return;
     }
