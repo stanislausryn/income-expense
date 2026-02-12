@@ -1,0 +1,325 @@
+const express = require("express");
+const cors = require("cors");
+const { Pool } = require("pg");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+console.log("DEBUG: DB Config:", {
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  passType: typeof process.env.DB_PASS,
+  passExists: !!process.env.DB_PASS,
+  passVal: process.env.DB_PASS // temporary for debugging
+});
+
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS ? String(process.env.DB_PASS) : "",
+  database: process.env.DB_NAME,
+});
+
+// Auto-migration for new tables
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS transactions (
+        id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL,
+        type VARCHAR(10) NOT NULL, -- 'income' or 'expense'
+        amount INT NOT NULL,
+        category VARCHAR(50) NOT NULL,
+        account VARCHAR(50),
+        note TEXT,
+        date DATE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS savings_plans (
+        id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        target_amount INT NOT NULL,
+        current_amount INT DEFAULT 0,
+        target_date DATE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS bills (
+        id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        amount INT NOT NULL,
+        due_date DATE NOT NULL,
+        is_paid BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log("Database tables checked/created.");
+  } catch (err) {
+    console.error("Error creating tables:", err);
+  }
+})();
+
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers["authorization"];
+
+  if (!authHeader) {
+    return res.status(401).json({ error: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Invalid token format" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+}
+
+
+app.get("/", (req, res) => {
+  res.json({ message: "Backend running!" });
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    console.log(`DEBUG: Login attempt for '${username}'`);
+
+    const result = await pool.query("SELECT * FROM users WHERE username=$1", [username]);
+
+    if (result.rows.length === 0) {
+      console.log("DEBUG: User not found");
+      return res.status(401).json({ error: "Invalid username/password" });
+    }
+
+    const user = result.rows[0];
+    console.log("DEBUG: User found:", { id: user.id, username: user.username, hasPassword: !!user.password, hasPasswordHash: !!user.password_hash });
+
+    // Use password_hash (preferred) or fallback to password
+    const storedHash = user.password_hash || user.password;
+
+    if (!storedHash) {
+      console.error("CRITICAL: User record has no password hash!");
+      return res.status(500).json({ error: "User record corrupted" });
+    }
+
+    const match = await bcrypt.compare(password, storedHash);
+    if (!match) {
+      console.log("DEBUG: Password mismatch.");
+      return res.status(401).json({ error: "Invalid username/password" });
+    }
+
+    const token = jwt.sign(
+      { user_id: user.id, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.json({ token });
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    res.status(500).json({ error: "Login failed: " + err.message });
+  }
+});
+
+
+app.post("/transactions", authMiddleware, async (req, res) => {
+  try {
+    const { type, amount, category, note, date, account } = req.body;
+    const userId = req.user.user_id;
+
+    const result = await pool.query(
+      "INSERT INTO transactions (user_id, type, amount, category, note, date) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
+      [userId, type, amount, category, note, date]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to insert transaction" });
+  }
+});
+
+app.get("/transactions", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+
+    const result = await pool.query(
+      "SELECT * FROM transactions WHERE user_id=$1 ORDER BY date DESC",
+      [userId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch transactions" });
+  }
+});
+
+app.get("/summary", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+
+    const income = await pool.query(
+      "SELECT COALESCE(SUM(amount),0) AS total FROM transactions WHERE user_id=$1 AND type='income'",
+      [userId]
+    );
+    const expense = await pool.query(
+      "SELECT COALESCE(SUM(amount),0) AS total FROM transactions WHERE user_id=$1 AND type='expense'",
+      [userId]
+    );
+
+    const totalIncome = parseInt(income.rows[0].total);
+    const totalExpense = parseInt(expense.rows[0].total);
+
+    res.json({
+      income: totalIncome,
+      expense: totalExpense,
+      balance: totalIncome - totalExpense,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch summary" });
+  }
+});
+
+/* --- SAVINGS ENDPOINTS --- */
+app.get("/savings", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const result = await pool.query("SELECT * FROM savings_plans WHERE user_id=$1 ORDER BY target_date ASC", [userId]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch savings" });
+  }
+});
+
+app.post("/savings", authMiddleware, async (req, res) => {
+  try {
+    const { name, target_amount, target_date } = req.body;
+    const userId = req.user.user_id;
+    const result = await pool.query(
+      "INSERT INTO savings_plans (user_id, name, target_amount, target_date) VALUES ($1, $2, $3, $4) RETURNING *",
+      [userId, name, target_amount, target_date]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create savings plan" });
+  }
+});
+
+app.put("/savings/:id/add", authMiddleware, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const planId = req.params.id;
+    const userId = req.user.user_id;
+
+    // Verify ownership
+    const plan = await pool.query("SELECT * FROM savings_plans WHERE id=$1 AND user_id=$2", [planId, userId]);
+    if (plan.rows.length === 0) return res.status(404).json({ error: "Plan not found" });
+
+    const result = await pool.query(
+      "UPDATE savings_plans SET current_amount = current_amount + $1 WHERE id=$2 RETURNING *",
+      [amount, planId]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update savings" });
+  }
+});
+
+app.delete("/savings/:id", authMiddleware, async (req, res) => {
+  try {
+    const planId = req.params.id;
+    const userId = req.user.user_id;
+    await pool.query("DELETE FROM savings_plans WHERE id=$1 AND user_id=$2", [planId, userId]);
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete" });
+  }
+});
+
+/* --- BILLS ENDPOINTS --- */
+app.get("/bills", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const result = await pool.query("SELECT * FROM bills WHERE user_id=$1 ORDER BY due_date ASC", [userId]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch bills" });
+  }
+});
+
+app.post("/bills", authMiddleware, async (req, res) => {
+  try {
+    const { name, amount, due_date } = req.body;
+    const userId = req.user.user_id;
+    const result = await pool.query(
+      "INSERT INTO bills (user_id, name, amount, due_date) VALUES ($1, $2, $3, $4) RETURNING *",
+      [userId, name, amount, due_date]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create bill" });
+  }
+});
+
+app.put("/bills/:id/pay", authMiddleware, async (req, res) => {
+  try {
+    const { is_paid } = req.body; // true or false
+    const billId = req.params.id;
+    const userId = req.user.user_id;
+
+    const result = await pool.query(
+      "UPDATE bills SET is_paid=$1 WHERE id=$2 AND user_id=$3 RETURNING *",
+      [is_paid, billId, userId]
+    );
+
+    if (result.rows.length === 0) return res.status(404).json({ error: "Bill not found" });
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update bill" });
+  }
+});
+
+app.delete("/bills/:id", authMiddleware, async (req, res) => {
+  try {
+    const billId = req.params.id;
+    const userId = req.user.user_id;
+    await pool.query("DELETE FROM bills WHERE id=$1 AND user_id=$2", [billId, userId]);
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete" });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Backend running on port", PORT));

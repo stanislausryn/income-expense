@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Finance Tracker</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.classList.add("dark-mode");
+    }
+  </script>
+</head>
+
+<body class="">
+
+  <div class="layout">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2 class="logo">Finance</h2>
+      </div>
+
+      <nav class="menu">
+        <button class="menu-btn active" onclick="location.href='dashboard.html'">
+          <span class="icon">🏠</span>
+          <span class="label">Dashboard</span>
+        </button>
+        <button class="menu-btn" onclick="location.href='savings.html'">
+          <span class="icon">🐷</span>
+          <span class="label">Savings Plan</span>
+        </button>
+        <button class="menu-btn" onclick="location.href='bills.html'">
+          <span class="icon">🔔</span>
+          <span class="label">Bills Reminder</span>
+        </button>
+        <button class="menu-btn" onclick="location.href='settings.html'">
+          <span class="icon">⚙️</span>
+          <span class="label">Settings</span>
+        </button>
+      </nav>
+
+      <button id="logoutBtn" class="btn-logout">
+        <span class="icon">🚪</span>
+        <span class="label">Logout</span>
+      </button>
+    </aside>
+
+    <main class="content">
+
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebarToggle" class="icon-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <h1 class="page-title">Dashboard</h1>
+        </div>
+
+        <button id="darkModeToggle" class="icon-btn" title="Toggle Dark Mode">
+          <svg class="sun-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" style="display:none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </header>
+
+      <section class="summary-grid">
+        <div class="card">
+          <p class="card-label">Balance</p>
+          <h2 id="balance" class="card-value">0</h2>
+        </div>
+
+        <div class="card">
+          <p class="card-label">Income</p>
+          <h2 id="income" class="card-value green">0</h2>
+        </div>
+
+        <div class="card">
+          <p class="card-label">Expense</p>
+          <h2 id="expense" class="card-value red">0</h2>
+        </div>
+      </section>
+
+      <section class="grid-dashboard">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Calendar</h3>
+            <div class="calendar-controls">
+              <select id="monthSelect"></select>
+              <select id="yearSelect"></select>
+            </div>
+          </div>
+          <div id="calendar" class="calendar"></div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Analytics</h3>
+          <div class="chart-wrapper" style="display: flex; gap: 10px; height: 250px;">
+            <div class="chart-container" style="flex:1; position: relative;">
+              <canvas id="expenseChart"></canvas>
+            </div>
+            <div class="chart-container" style="flex:1; position: relative;">
+              <canvas id="incomeChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid-transactions">
+        <div class="card">
+          <h3 class="card-title">Add Transaction</h3>
+          <form id="txForm" class="form-grid">
+
+            <div class="full">
+              <label
+                style="color:var(--text-secondary); font-size:14px; margin-bottom: 6px; display:block;">Type</label>
+              <div class="toggle-container">
+                <input type="radio" id="type-income" name="type" value="income" checked>
+                <label for="type-income">Income</label>
+
+                <input type="radio" id="type-expense" name="type" value="expense">
+                <label for="type-expense">Expense</label>
+              </div>
+            </div>
+
+            <div>
+              <label>Amount</label>
+              <input type="number" id="amount" required placeholder="0" />
+            </div>
+
+            <div>
+              <label>Category</label>
+              <select id="category"></select>
+            </div>
+
+            <div>
+              <label>Account</label>
+              <select id="account">
+                <option value="Cash">Cash</option>
+                <option value="Bank">Bank</option>
+                <option value="E-Wallet">E-Wallet</option>
+              </select>
+            </div>
+
+            <div class="full">
+              <label>Notes</label>
+              <input type="text" id="note" placeholder="Description..." />
+            </div>
+
+            <div class="full">
+              <button class="btn-primary" type="submit">Save Transaction</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Transactions</h3>
+            <div class="date-filters">
+              <input type="date" id="startDate" placeholder="Start Date" />
+              <span style="align-self: center;">to</span>
+              <input type="date" id="endDate" placeholder="End Date" />
+              <button id="clearFilters" class="btn-small">Clear</button>
+            </div>
+          </div>
+          <div id="activeFilterDisplay" class="filter-status"></div>
+          <ul id="transactionsList" class="tx-list"></ul>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+
+</html>

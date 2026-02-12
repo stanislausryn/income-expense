@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Savings - Finance Tracker</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script>
+        if (localStorage.getItem("theme") === "dark") {
+            document.documentElement.classList.add("dark-mode");
+        }
+    </script>
+</head>
+
+<body class="light-mode">
+    <div class="layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="logo">Finance</h2>
+            </div>
+            <nav class="menu">
+                <button class="menu-btn" onclick="location.href='dashboard.html'">
+                    <span class="icon">🏠</span><span class="label">Dashboard</span>
+                </button>
+                <button class="menu-btn active" onclick="location.href='savings.html'">
+                    <span class="icon">🐷</span><span class="label">Savings Plan</span>
+                </button>
+                <button class="menu-btn" onclick="location.href='bills.html'">
+                    <span class="icon">🔔</span><span class="label">Bills Reminder</span>
+                </button>
+                <button class="menu-btn" onclick="location.href='settings.html'">
+                    <span class="icon">⚙️</span><span class="label">Settings</span>
+                </button>
+            </nav>
+            <button id="logoutBtn" class="btn-logout">
+                <span class="icon">🚪</span><span class="label">Logout</span>
+            </button>
+        </aside>
+
+        <main class="content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button id="sidebarToggle" class="icon-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <h1 class="page-title">Savings Plan</h1>
+                </div>
+
+                <button id="darkModeToggle" class="icon-btn" title="Toggle Dark Mode">
+                    <svg class="sun-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" style="display:none;">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </header>
+
+            <section class="grid-dashboard">
+                <div class="card">
+                    <h3 class="card-title">Create New Plan</h3>
+                    <form id="savingsForm" class="form-grid">
+                        <div class="full">
+                            <label>Plan Name</label>
+                            <input type="text" id="planName" placeholder="e.g. New Laptop" required />
+                        </div>
+                        <div>
+                            <label>Target Amount</label>
+                            <input type="number" id="targetAmount" required />
+                        </div>
+                        <div>
+                            <div>
+                                <label>Target Date</label>
+                                <button type="button" id="datePickerBtn" class="btn-small"
+                                    style="width:100%; height:42px;">Select Date</button>
+                                <input type="hidden" id="targetDate" required />
+                            </div>
+                        </div>
+                        <div class="full">
+                            <button class="btn-primary" type="submit">Create Plan</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card full">
+                    <h3 class="card-title">My Savings Plans</h3>
+                    <div id="savingsList" class="savings-grid"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/savings.js"></script>
+</body>
+
+</html>

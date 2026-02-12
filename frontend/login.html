@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Finance Tracker</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script>
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.classList.add("dark-mode");
+    }
+  </script>
+</head>
+
+<body class="bg">
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <h1 class="title">Finance Tracker</h1>
+      <p class="subtitle">Please login to continue</p>
+
+      <form id="loginForm" class="form">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Enter your username" required />
+
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required />
+
+        <button class="btn-primary" type="submit">Login</button>
+      </form>
+
+      <p id="errorMsg" class="error"></p>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/login.js"></script>
+</body>
+
+</html>
