@@ -141,6 +141,32 @@ app.post("/login", async (req, res) => {
 });
 
 
+app.post("/register", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password required" });
+    }
+
+    const existing = await pool.query("SELECT * FROM users WHERE username=$1", [username]);
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ error: "Username already exists" });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    const result = await pool.query(
+      "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username",
+      [username, hash]
+    );
+
+    res.json({ message: "User created", user: result.rows[0] });
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
+    res.status(500).json({ error: "Registration failed" });
+  }
+});
+
+
 app.post("/transactions", authMiddleware, async (req, res) => {
   try {
     const { type, amount, category, note, date, account } = req.body;

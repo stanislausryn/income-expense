@@ -46,10 +46,12 @@ services:
       - "1292:80"
     networks:
       - app_network
+      - proxy_net
 
 networks:
   app_network:
     driver: bridge
-
+  proxy_net:
+    external: true
 volumes:
   pgdata:
