@@ -85,9 +85,5 @@ The application is configured for production deployment using `docker-compose.pr
 └── docker-compose.prod.yml # Production Configuration
 ```
 
-## 📸 Screenshots
-
-*(Add your screenshots here)*
-
 ---
-*Built for the "Freepass 2026" Competition.*
+*Built for the "POROS Freepass 2026" Competition.*
