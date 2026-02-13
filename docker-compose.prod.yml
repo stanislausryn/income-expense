@@ -9,6 +9,7 @@ services:
       POSTGRES_DB: incomeexpense
     networks:
       - app_network
+      - proxy_net
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -35,6 +36,7 @@ services:
       JWT_SECRET: supersecret123
     networks:
       - app_network
+      - proxy_net
 
   frontend:
     image: ${DOCKER_USERNAME}/income-expense-frontend:latest
