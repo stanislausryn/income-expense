@@ -3,6 +3,7 @@ const cors = require("cors");
 const { Pool } = require("pg");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const axios = require("axios"); // Added for proxying to exporter
 require("dotenv").config();
 
 const app = express();
@@ -370,6 +371,23 @@ app.put("/bills/:id/pay", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to update bill" });
+  }
+});
+
+app.get("/download-data", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    // Call the exporter service (internal network)
+    const response = await axios.get(`http://exporter:5000/export?user_id=${userId}`, {
+      responseType: 'arraybuffer'
+    });
+
+    res.setHeader('Content-Disposition', 'attachment; filename=finance_data.xlsx');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(response.data);
+  } catch (err) {
+    console.error("EXPORT ERROR:", err.message);
+    res.status(500).json({ error: "Failed to export data" });
   }
 });
 

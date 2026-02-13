@@ -37,6 +37,21 @@ services:
     networks:
       - app_network
       - proxy_net
+  exporter:
+    build: ./exporter
+    container_name: incomeexpense-exporter
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_NAME: incomeexpense
+      DB_USER: postgres
+      DB_PASS: postgres
+    networks:
+      - app_network
+      - proxy_net
 
   frontend:
     image: ${DOCKER_USERNAME}/income-expense-frontend:latest

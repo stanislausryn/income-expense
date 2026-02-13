@@ -26,6 +26,31 @@ document.getElementById("resetDataBtn").addEventListener("click", async () => {
     }
 });
 
+document.getElementById("exportBtn").addEventListener("click", async () => {
+    try {
+        const token = getToken();
+        const res = await fetch(`${API_URL}/download-data`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "finance_data.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } else {
+            alert("Export failed.");
+        }
+    } catch (error) {
+        console.error("Export error:", error);
+        alert("Error exporting data.");
+    }
+});
+
 document.getElementById("logoutBtn").addEventListener("click", () => {
     clearToken();
     window.location.href = "login.html";
