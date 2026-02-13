@@ -167,6 +167,19 @@ app.post("/register", async (req, res) => {
 });
 
 
+app.post("/reset", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    await pool.query("DELETE FROM transactions WHERE user_id=$1", [userId]);
+    await pool.query("DELETE FROM bills WHERE user_id=$1", [userId]);
+    await pool.query("DELETE FROM savings_plans WHERE user_id=$1", [userId]);
+    res.json({ message: "Data reset successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to reset data" });
+  }
+});
+
 app.post("/transactions", authMiddleware, async (req, res) => {
   try {
     const { type, amount, category, note, date, account } = req.body;
@@ -187,11 +200,19 @@ app.post("/transactions", authMiddleware, async (req, res) => {
 app.get("/transactions", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.user_id;
+    const { month } = req.query;
 
-    const result = await pool.query(
-      "SELECT * FROM transactions WHERE user_id=$1 ORDER BY date DESC",
-      [userId]
-    );
+    let query = "SELECT * FROM transactions WHERE user_id=$1";
+    let params = [userId];
+
+    if (month) {
+      query += " AND to_char(date, 'YYYY-MM') = $2";
+      params.push(month);
+    }
+
+    query += " ORDER BY date DESC, id DESC";
+
+    const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -202,15 +223,20 @@ app.get("/transactions", authMiddleware, async (req, res) => {
 app.get("/summary", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.user_id;
+    const { month } = req.query;
 
-    const income = await pool.query(
-      "SELECT COALESCE(SUM(amount),0) AS total FROM transactions WHERE user_id=$1 AND type='income'",
-      [userId]
-    );
-    const expense = await pool.query(
-      "SELECT COALESCE(SUM(amount),0) AS total FROM transactions WHERE user_id=$1 AND type='expense'",
-      [userId]
-    );
+    let incomeQuery = "SELECT COALESCE(SUM(amount),0) AS total FROM transactions WHERE user_id=$1 AND type='income'";
+    let expenseQuery = "SELECT COALESCE(SUM(amount),0) AS total FROM transactions WHERE user_id=$1 AND type='expense'";
+    let params = [userId];
+
+    if (month) {
+      incomeQuery += " AND to_char(date, 'YYYY-MM') = $2";
+      expenseQuery += " AND to_char(date, 'YYYY-MM') = $2";
+      params.push(month);
+    }
+
+    const income = await pool.query(incomeQuery, params);
+    const expense = await pool.query(expenseQuery, params);
 
     const totalIncome = parseInt(income.rows[0].total);
     const totalExpense = parseInt(expense.rows[0].total);

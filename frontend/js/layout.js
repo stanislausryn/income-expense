@@ -75,7 +75,7 @@ function formatDate(dateString, includeTime = false) {
         options.minute = '2-digit';
     }
 
-    return date.toLocaleDateString('id-ID', options);
+    return date.toLocaleDateString('en-US', options);
 }
 
 if (!localStorage.getItem("token") && !window.location.href.includes("login.html")) {

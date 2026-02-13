@@ -282,15 +282,9 @@ document.getElementById("txForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   if (!selectedDate && !startDate) {
-    if (!selectedDate) {
-      const now = new Date();
-      selectedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    }
-  }
-
-  if (!selectedDate) {
-    alert("Please select a specific date on the calendar to add a transaction.");
-    return;
+    // Default to today if nothing selected
+    const now = new Date();
+    selectedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   }
 
   const type = document.querySelector('input[name="type"]:checked').value;
@@ -299,9 +293,10 @@ document.getElementById("txForm").addEventListener("submit", async (e) => {
   const account = document.getElementById("account").value;
   const note = document.getElementById("note").value;
 
+  // Use selectedDate for the payload
   await apiFetch("/transactions", {
     method: "POST",
-    body: JSON.stringify({ type, amount, category, note, date: selectedDate, account }),
+    body: JSON.stringify({ type, amount, category, note, date: selectedDate || startDate, account }),
   });
 
   e.target.reset();
@@ -315,8 +310,6 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   window.location.href = "login.html";
 });
 
-if (typeof window.loadTransactions === 'function') loadTransactions();
-
 function onCalendarDateSelect(dateStr) {
   selectedDate = dateStr;
   startDate = "";
@@ -326,14 +319,13 @@ function onCalendarDateSelect(dateStr) {
   document.getElementById("endDate").value = "";
 
   loadTransactions();
-
-
 }
 
 async function setupMonthYearDropdown() {
   const monthSelect = document.getElementById("monthSelect");
   const yearSelect = document.getElementById("yearSelect");
-  const currentYear = new Date().getFullYear();
+  const now = new Date();
+  const currentYear = now.getFullYear();
 
   for (let i = currentYear - 5; i <= currentYear + 5; i++) {
     const option = document.createElement("option");
@@ -354,19 +346,97 @@ async function setupMonthYearDropdown() {
     monthSelect.appendChild(option);
   });
 
-  monthSelect.value = new Date().getMonth();
+  // Set current month
+  monthSelect.value = now.getMonth();
 
   function updateCalendar() {
     const y = parseInt(yearSelect.value);
     const m = parseInt(monthSelect.value);
+
+    // FORMAT: YYYY-MM
+    selectedMonth = `${y}-${String(m + 1).padStart(2, "0")}`;
+
+    // Clear selections when month changes
+    selectedDate = "";
+    startDate = "";
+    endDate = "";
+    document.getElementById("startDate").value = "";
+    document.getElementById("endDate").value = "";
+
     generateCalendar(y, m, onCalendarDateSelect, "calendar");
 
+    // Load data for this month
+    refresh();
   }
 
   monthSelect.addEventListener("change", updateCalendar);
   yearSelect.addEventListener("change", updateCalendar);
 
+  // Initial load
   updateCalendar();
+}
+
+// Logic to handle Date comparison (YYYY-MM-DD vs ISO with time)
+function sameDay(d1, d2) {
+  if (!d1 || !d2) return false;
+  // d1 is from DB (ISO string maybe), d2 is YYYY-MM-DD string
+  const date1 = new Date(d1);
+  const date2 = new Date(d2);
+  return date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate();
+}
+
+// Override loadTransactions to correct filtering
+async function loadTransactions() {
+  let url = `/transactions`;
+  if (selectedMonth) url += `?month=${selectedMonth}`;
+
+  const res = await apiFetch(url);
+  if (!res.ok) return;
+
+  let apiData = await res.json();
+  let filteredData = apiData;
+
+  const statusEl = document.getElementById("activeFilterDisplay");
+  statusEl.textContent = "";
+
+  if (selectedDate) {
+    // Client-side filtering for specific date
+    filteredData = apiData.filter(t => sameDay(t.date, selectedDate));
+    statusEl.textContent = `Showing transactions for: ${selectedDate}`;
+  } else if (startDate && endDate) {
+    statusEl.textContent = `Showing transactions from ${startDate} to ${endDate}`;
+  }
+
+  const list = document.getElementById("transactionsList");
+  list.innerHTML = "";
+
+  if (filteredData.length === 0) {
+    list.innerHTML = `<li class="tx-item" style="justify-content:center; color:var(--text-secondary)">No transactions found</li>`;
+  }
+
+  filteredData.forEach((t) => {
+    const li = document.createElement("li");
+    li.className = "tx-item";
+
+    const isIncome = t.type === 'income';
+    const amountClass = isIncome ? 'green' : 'red';
+    const sign = isIncome ? '+' : '-';
+
+    li.innerHTML = `
+      <div class="tx-info">
+        <h4>${t.category}</h4>
+        <p>${formatDate(t.date, true)} • ${t.note || t.account || 'No notes'}</p>
+      </div>
+      <div class="tx-amount ${amountClass}">
+        ${sign}Rp${parseInt(t.amount).toLocaleString()}
+      </div>
+    `;
+    list.appendChild(li);
+  });
+
+  updateCharts(apiData); // Charts always show the whole month
 }
 
 redirectIfNotLoggedIn();
