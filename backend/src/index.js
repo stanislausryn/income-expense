@@ -384,6 +384,7 @@ app.get("/download-data", authMiddleware, async (req, res) => {
 
     res.setHeader('Content-Disposition', 'attachment; filename=finance_data.xlsx');
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.send(response.data);
   } catch (err) {
     console.error("EXPORT ERROR:", err.message);

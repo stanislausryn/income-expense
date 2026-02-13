@@ -565,6 +565,7 @@ i.calendar-controls select {
     padding: 16px;
   }
 
+  /* Fix Savings/Bills List Alignment */
   .tx-item {
     padding: 12px;
     flex-direction: column;
@@ -572,7 +573,39 @@ i.calendar-controls select {
     gap: 8px;
   }
 
+  .tx-info {
+    width: 100%;
+  }
+
   .tx-amount {
-    align-self: flex-end;
+    align-self: flex-start;
+    margin-top: 4px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  /* Fix calendar overflow */
+  .calendar-controls {
+    flex-wrap: wrap;
+  }
+
+  .calendar {
+    gap: 2px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    /* Scrollbar space */
+  }
+
+  .day {
+    height: 30px;
+    font-size: 11px;
+    min-width: 30px;
+  }
+
+  /* Ensure buttons/inputs dont overflow */
+  .btn-primary,
+  input,
+  select {
+    width: 100%;
   }
 }
