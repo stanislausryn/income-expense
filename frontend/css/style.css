@@ -562,41 +562,57 @@ i.calendar-controls select {
 
 @media (max-width: 480px) {
   .card {
-    padding: 16px;
-  }
-
-  .tx-item {
     padding: 12px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    /* Tighter padding */
+    margin-bottom: 12px;
   }
 
-  .tx-info {
-    width: 100%;
+  .content {
+    padding: 10px;
+    /* Wider space left/right (less padding) */
   }
 
-  .tx-amount {
-    align-self: flex-start;
-    margin-top: 4px;
-    font-size: 18px;
-    font-weight: 700;
+  .grid-dashboard,
+  .grid-transactions {
+    grid-template-columns: 1fr;
+    /* Full width, no side gaps */
+    gap: 12px;
+    /* Tighter up/down */
+    margin-bottom: 12px;
   }
 
-  .calendar-controls {
-    flex-wrap: wrap;
+  .summary-grid {
+    gap: 12px;
+    margin-bottom: 12px;
   }
 
-  .calendar {
-    gap: 2px;
-    overflow-x: auto;
-    padding-bottom: 5px;
+  /* Compact Charts */
+  .chart-container,
+  .charts-wrapper {
+    min-height: 200px !important;
+    height: 200px !important;
   }
 
+  /* Compact Calendar */
   .day {
     height: 30px;
     font-size: 11px;
-    min-width: 30px;
+    min-width: 25px;
+  }
+
+  .calendar {
+    gap: 1px;
+  }
+
+  /* List Items */
+  .tx-item {
+    padding: 10px;
+    gap: 4px;
+  }
+
+  .tx-amount {
+    font-size: 16px;
+    margin-top: 2px;
   }
 
   /* Ensure buttons/inputs dont overflow */
@@ -609,7 +625,6 @@ i.calendar-controls select {
   /* Dashboard Charts Stack */
   .charts-wrapper {
     flex-direction: column;
-    height: auto !important;
   }
 
   /* Wrap date filters on mobile */
