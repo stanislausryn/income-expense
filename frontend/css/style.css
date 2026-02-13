@@ -245,7 +245,7 @@ body {
 .grid-dashboard,
 .grid-transactions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
   margin-bottom: 24px;
 }
@@ -565,7 +565,6 @@ i.calendar-controls select {
     padding: 16px;
   }
 
-  /* Fix Savings/Bills List Alignment */
   .tx-item {
     padding: 12px;
     flex-direction: column;
@@ -584,7 +583,6 @@ i.calendar-controls select {
     font-weight: 700;
   }
 
-  /* Fix calendar overflow */
   .calendar-controls {
     flex-wrap: wrap;
   }
@@ -593,7 +591,6 @@ i.calendar-controls select {
     gap: 2px;
     overflow-x: auto;
     padding-bottom: 5px;
-    /* Scrollbar space */
   }
 
   .day {
@@ -602,7 +599,6 @@ i.calendar-controls select {
     min-width: 30px;
   }
 
-  /* Ensure buttons/inputs dont overflow */
   .btn-primary,
   input,
   select {

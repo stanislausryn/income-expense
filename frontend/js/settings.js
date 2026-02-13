@@ -43,11 +43,12 @@ document.getElementById("exportBtn").addEventListener("click", async () => {
             a.click();
             a.remove();
         } else {
-            alert("Export failed.");
+            const errText = await res.text();
+            alert(`Export failed: ${res.status} ${errText}`);
         }
     } catch (error) {
         console.error("Export error:", error);
-        alert("Error exporting data.");
+        alert(`Error exporting data: ${error.message}`);
     }
 });
 
