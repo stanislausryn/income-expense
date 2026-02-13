@@ -213,7 +213,24 @@ app.get("/transactions", authMiddleware, async (req, res) => {
     query += " ORDER BY date DESC, id DESC";
 
     const result = await pool.query(query, params);
-    res.json(result.rows);
+
+    // Normalize date to YYYY-MM-DD string to avoid timezone issues on frontend
+    const formattedRows = result.rows.map(row => {
+      // If row.date is a Date object, formatting it to ISO string YYYY-MM-DD
+      // Use to_char in SQL is better, but mapping here is easier to read.
+      // Actually, let's trust the SQL modification if possible, but map is safer for now without listing all columns.
+      let d = row.date;
+      if (d instanceof Date) {
+        // Use UTC methods to match the DB storage (DATE type is usually midnight UTC)
+        const year = d.getUTCFullYear();
+        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        d = `${year}-${month}-${day}`;
+      }
+      return { ...row, date: d };
+    });
+
+    res.json(formattedRows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch transactions" });

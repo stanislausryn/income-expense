@@ -376,67 +376,63 @@ async function setupMonthYearDropdown() {
   updateCalendar();
 }
 
-// Logic to handle Date comparison (YYYY-MM-DD vs ISO with time)
-function sameDay(d1, d2) {
-  if (!d1 || !d2) return false;
-  // d1 is from DB (ISO string maybe), d2 is YYYY-MM-DD string
-  const date1 = new Date(d1);
-  const date2 = new Date(d2);
-  return date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate();
-}
-
-// Override loadTransactions to correct filtering
-async function loadTransactions() {
+// Simplified date comparison since backend now guarantees YYYY-MM-DD string
+function loadTransactions() {
   let url = `/transactions`;
   if (selectedMonth) url += `?month=${selectedMonth}`;
 
-  const res = await apiFetch(url);
-  if (!res.ok) return;
+  // Use the cached function or define it
+  const fetchAndRender = async () => {
+    const res = await apiFetch(url);
+    if (!res.ok) return;
 
-  let apiData = await res.json();
-  let filteredData = apiData;
+    let apiData = await res.json();
+    let filteredData = apiData;
 
-  const statusEl = document.getElementById("activeFilterDisplay");
-  statusEl.textContent = "";
+    const statusEl = document.getElementById("activeFilterDisplay");
+    statusEl.textContent = "";
 
-  if (selectedDate) {
-    // Client-side filtering for specific date
-    filteredData = apiData.filter(t => sameDay(t.date, selectedDate));
-    statusEl.textContent = `Showing transactions for: ${selectedDate}`;
-  } else if (startDate && endDate) {
-    statusEl.textContent = `Showing transactions from ${startDate} to ${endDate}`;
-  }
+    if (selectedDate) {
+      // Strict string comparison
+      filteredData = apiData.filter(t => t.date === selectedDate);
+      statusEl.textContent = `Showing transactions for: ${selectedDate}`;
+    } else if (startDate && endDate) {
+      statusEl.textContent = `Showing transactions from ${startDate} to ${endDate}`;
+      filteredData = apiData.filter(t => t.date >= startDate && t.date <= endDate);
+    }
 
-  const list = document.getElementById("transactionsList");
-  list.innerHTML = "";
+    const list = document.getElementById("transactionsList");
+    list.innerHTML = "";
 
-  if (filteredData.length === 0) {
-    list.innerHTML = `<li class="tx-item" style="justify-content:center; color:var(--text-secondary)">No transactions found</li>`;
-  }
+    if (filteredData.length === 0) {
+      list.innerHTML = `<li class="tx-item" style="justify-content:center; color:var(--text-secondary)">No transactions found</li>`;
+    }
 
-  filteredData.forEach((t) => {
-    const li = document.createElement("li");
-    li.className = "tx-item";
+    filteredData.forEach((t) => {
+      const li = document.createElement("li");
+      li.className = "tx-item";
 
-    const isIncome = t.type === 'income';
-    const amountClass = isIncome ? 'green' : 'red';
-    const sign = isIncome ? '+' : '-';
+      const isIncome = t.type === 'income';
+      const amountClass = isIncome ? 'green' : 'red';
+      const sign = isIncome ? '+' : '-';
 
-    li.innerHTML = `
-      <div class="tx-info">
-        <h4>${t.category}</h4>
-        <p>${formatDate(t.date, true)} • ${t.note || t.account || 'No notes'}</p>
-      </div>
-      <div class="tx-amount ${amountClass}">
-        ${sign}Rp${parseInt(t.amount).toLocaleString()}
-      </div>
-    `;
-    list.appendChild(li);
-  });
+      // formatDate with includeTime = false
+      li.innerHTML = `
+        <div class="tx-info">
+          <h4>${t.category}</h4>
+          <p>${formatDate(t.date, false)} • ${t.note || t.account || 'No notes'}</p>
+        </div>
+        <div class="tx-amount ${amountClass}">
+          ${sign}Rp${parseInt(t.amount).toLocaleString()}
+        </div>
+      `;
+      list.appendChild(li);
+    });
 
-  updateCharts(apiData); // Charts always show the whole month
+    updateCharts(apiData); // Charts always use full month data
+  };
+
+  fetchAndRender();
 }
 
 redirectIfNotLoggedIn();
