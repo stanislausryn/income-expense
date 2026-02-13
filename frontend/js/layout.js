@@ -10,6 +10,13 @@ if (sidebarToggle && sidebar) {
         }
     });
 
+    const closeSidebarBtn = document.getElementById("closeSidebar");
+    if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener("click", () => {
+            sidebar.classList.remove("open");
+        });
+    }
+
     document.addEventListener("click", (e) => {
         if (window.innerWidth <= 768 &&
             sidebar.classList.contains("open") &&

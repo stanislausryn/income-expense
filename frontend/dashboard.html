@@ -21,6 +21,12 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h2 class="logo">Finance</h2>
+        <button id="closeSidebar" class="icon-btn-ghost mobile-only">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
 
       <nav class="menu">
@@ -113,11 +119,11 @@
 
         <div class="card">
           <h3 class="card-title">Analytics</h3>
-          <div class="chart-wrapper" style="display: flex; gap: 10px; height: 250px;">
-            <div class="chart-container" style="flex:1; position: relative;">
+          <div class="charts-wrapper">
+            <div class="chart-container">
               <canvas id="incomeChart"></canvas>
             </div>
-            <div class="chart-container" style="flex:1; position: relative;">
+            <div class="chart-container">
               <canvas id="expenseChart"></canvas>
             </div>
           </div>

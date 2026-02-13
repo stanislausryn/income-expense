@@ -3,7 +3,7 @@ const cors = require("cors");
 const { Pool } = require("pg");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const axios = require("axios"); // Added for proxying to exporter
+const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
@@ -215,14 +215,9 @@ app.get("/transactions", authMiddleware, async (req, res) => {
 
     const result = await pool.query(query, params);
 
-    // Normalize date to YYYY-MM-DD string to avoid timezone issues on frontend
     const formattedRows = result.rows.map(row => {
-      // If row.date is a Date object, formatting it to ISO string YYYY-MM-DD
-      // Use to_char in SQL is better, but mapping here is easier to read.
-      // Actually, let's trust the SQL modification if possible, but map is safer for now without listing all columns.
       let d = row.date;
       if (d instanceof Date) {
-        // Use UTC methods to match the DB storage (DATE type is usually midnight UTC)
         const year = d.getUTCFullYear();
         const month = String(d.getUTCMonth() + 1).padStart(2, '0');
         const day = String(d.getUTCDate()).padStart(2, '0');
@@ -377,7 +372,6 @@ app.put("/bills/:id/pay", authMiddleware, async (req, res) => {
 app.get("/download-data", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.user_id;
-    // Call the exporter service (internal network)
     const response = await axios.get(`http://exporter:5000/export?user_id=${userId}`, {
       responseType: 'arraybuffer'
     });

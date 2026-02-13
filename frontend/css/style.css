@@ -599,9 +599,57 @@ i.calendar-controls select {
     min-width: 30px;
   }
 
+  /* Ensure buttons/inputs dont overflow */
   .btn-primary,
   input,
   select {
     width: 100%;
   }
+
+  /* Dashboard Charts Stack */
+  .charts-wrapper {
+    flex-direction: column;
+    height: auto !important;
+  }
+
+  /* Wrap date filters on mobile */
+  .date-filters {
+    flex-wrap: wrap;
+  }
+}
+
+/* Base Styles for new elements */
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: flex;
+  }
+
+  .sidebar-header {
+    justify-content: space-between;
+    padding-right: 10px;
+  }
+}
+
+.icon-btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 5px;
+}
+
+.charts-wrapper {
+  display: flex;
+  gap: 10px;
+  height: 250px;
+}
+
+.chart-container {
+  flex: 1;
+  position: relative;
+  min-height: 250px;
 }
