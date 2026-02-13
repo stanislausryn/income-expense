@@ -2,7 +2,8 @@ const sidebar = document.getElementById("sidebar");
 const sidebarToggle = document.getElementById("sidebarToggle");
 
 if (sidebarToggle && sidebar) {
-    sidebarToggle.addEventListener("click", () => {
+    sidebarToggle.addEventListener("click", (e) => {
+        e.stopPropagation(); // Prevent immediate closing
         if (window.innerWidth <= 768) {
             sidebar.classList.toggle("open");
         } else {

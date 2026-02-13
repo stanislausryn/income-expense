@@ -563,22 +563,25 @@ i.calendar-controls select {
 @media (max-width: 480px) {
   .card {
     padding: 12px;
-    /* Tighter padding */
     margin-bottom: 12px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .content {
     padding: 10px;
-    /* Wider space left/right (less padding) */
   }
 
   .grid-dashboard,
   .grid-transactions {
-    grid-template-columns: 1fr;
-    /* Full width, no side gaps */
+    display: flex;
+    /* Switch to flex column for safer stacking */
+    flex-direction: column;
     gap: 12px;
-    /* Tighter up/down */
     margin-bottom: 12px;
+    width: 100%;
   }
 
   .summary-grid {
@@ -591,6 +594,13 @@ i.calendar-controls select {
   .charts-wrapper {
     min-height: 200px !important;
     height: 200px !important;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  canvas {
+    max-width: 100%;
   }
 
   /* Compact Calendar */
