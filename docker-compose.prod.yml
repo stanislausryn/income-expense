@@ -38,7 +38,7 @@ services:
       - app_network
       - proxy_net
   exporter:
-    build: ./exporter
+    image: ${DOCKER_USERNAME}/income-expense-exporter:latest
     container_name: incomeexpense-exporter
     restart: always
     depends_on:
