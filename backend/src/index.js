@@ -390,14 +390,6 @@ app.get("/download-data", authMiddleware, async (req, res) => {
   }
 });
 
-app.get("/test-download", authMiddleware, (req, res) => {
-  const fileContent = "This is a test file to verify Cloudflare/Nginx download capability.";
-  res.setHeader('Content-Disposition', 'attachment; filename=test.txt');
-  res.setHeader('Content-Type', 'text/plain');
-  res.setHeader('Cache-Control', 'no-store');
-  res.send(fileContent);
-});
-
 app.delete("/bills/:id", authMiddleware, async (req, res) => {
   try {
     const billId = req.params.id;

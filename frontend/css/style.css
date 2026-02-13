@@ -589,13 +589,22 @@ i.calendar-controls select {
     margin-bottom: 12px;
   }
 
-  /* Compact Charts */
-  .chart-container,
+  /* Dashboard Charts Stack */
   .charts-wrapper {
-    min-height: 200px !important;
-    height: 200px !important;
+    flex-direction: column;
+    height: auto !important;
+    /* Allow growing to fit both charts */
+  }
+
+  /* Compact Charts */
+  .chart-container {
+    min-height: 250px !important;
+    /* Give each chart enough space */
+    height: 250px !important;
     width: 100%;
     max-width: 100%;
+    margin-bottom: 20px;
+    /* Add spacing between charts */
     overflow: hidden;
   }
 

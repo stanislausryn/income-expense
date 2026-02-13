@@ -52,29 +52,7 @@ document.getElementById("exportBtn").addEventListener("click", async () => {
     }
 });
 
-const testExportBtn = document.getElementById("testExportBtn");
-if (testExportBtn) {
-    testExportBtn.addEventListener("click", async () => {
-        try {
-            const res = await apiFetch("/test-download");
-            if (res.ok) {
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "test.txt";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            } else {
-                const errText = await res.text();
-                alert(`Test download failed: ${res.status} ${errText}`);
-            }
-        } catch (error) {
-            alert(`Error testing download: ${error.message}`);
-        }
-    });
-}
+
 
 document.getElementById("logoutBtn").addEventListener("click", () => {
     clearToken();

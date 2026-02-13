@@ -3,11 +3,24 @@ const sidebarToggle = document.getElementById("sidebarToggle");
 
 if (sidebarToggle && sidebar) {
     sidebarToggle.addEventListener("click", (e) => {
-        e.stopPropagation(); // Prevent immediate closing
+        e.stopPropagation();
+        // On mobile, we want to toggle the 'open' class to show/hide
         if (window.innerWidth <= 768) {
             sidebar.classList.toggle("open");
         } else {
+            // On desktop, we toggle 'collapsed'
             sidebar.classList.toggle("collapsed");
+        }
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener("click", (e) => {
+        if (window.innerWidth <= 768 &&
+            sidebar.classList.contains("open") &&
+            !sidebar.contains(e.target) &&
+            e.target !== sidebarToggle &&
+            !sidebarToggle.contains(e.target)) {
+            sidebar.classList.remove("open");
         }
     });
 
