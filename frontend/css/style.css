@@ -547,6 +547,12 @@ i.calendar-controls select {
     z-index: 50;
     transform: translateX(-100%);
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    /* Add transition for smooth slide */
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
   }
 
   .content {
