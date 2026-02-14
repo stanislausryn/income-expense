@@ -6,7 +6,6 @@ from flask import Flask, request, send_file
 
 app = Flask(__name__)
 
-# Database connection
 def get_db_connection():
     conn = psycopg2.connect(
         host=os.environ['DB_HOST'],
@@ -25,14 +24,12 @@ def export_data():
     try:
         conn = get_db_connection()
         
-        # Fetch data
         transactions = pd.read_sql(f"SELECT * FROM transactions WHERE user_id = {user_id} ORDER BY date DESC", conn)
         bills = pd.read_sql(f"SELECT * FROM bills WHERE user_id = {user_id}", conn)
         savings = pd.read_sql(f"SELECT * FROM savings_plans WHERE user_id = {user_id}", conn)
         
         conn.close()
 
-        # Create Excel file in memory
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             transactions.to_excel(writer, sheet_name='Transactions', index=False)

@@ -20,7 +20,7 @@ services:
       retries: 5
 
   backend:
-    image: ${DOCKER_USERNAME}/income-expense-backend:latest
+    image: ${IMAGE_PREFIX}/backend:latest
     container_name: incomeexpense-backend
     restart: always
     depends_on:
@@ -38,7 +38,7 @@ services:
       - app_network
       - proxy_net
   exporter:
-    image: ${DOCKER_USERNAME}/income-expense-exporter:latest
+    image: ${IMAGE_PREFIX}/exporter:latest
     container_name: incomeexpense-exporter
     restart: always
     depends_on:
@@ -54,7 +54,7 @@ services:
       - proxy_net
 
   frontend:
-    image: ${DOCKER_USERNAME}/income-expense-frontend:latest
+    image: ${IMAGE_PREFIX}/frontend:latest
     container_name: incomeexpense-frontend
     restart: always
     depends_on:

@@ -1,89 +1,126 @@
 # 💰 Personal Finance Tracker
 
-A modern, responsive, and containerized web application for tracking income, expenses, savings goals, and bills. Built with a focus on performance, security, and mobile usability.
+A robust, microservices-based web application for tracking income, expenses, and financial goals. Built for the "POROS Freepass 2026" competition, featuring a fully containerized architecture and automated CI/CD pipeline.
 
-## 🚀 Features
+## 🏗️ Architecture
 
--   **Dashboard Overview**: Real-time summary of current balance, income, and expenses with visual charts.
--   **Transaction Management**: Add, view, and filter income and expense transactions.
--   **Mobile-First Design**: Fully responsive UI with a collapsible sidebar and touch-friendly controls.
--   **Savings Plans**: Create and track progress towards financial goals.
--   **Bill Reminders**: Track upcoming bills and due dates.
--   **Data Export**: Download all financial data as an Excel (`.xlsx`) file.
--   **Secure Authentication**: User registration and login with JWT-based sessions.
--   **Dark Mode**: Built-in dark theme support.
--   **Cloud-Ready**: Dockerized architecture with Nginx reverse proxy, ready for deployment (e.g., via Cloudflare Tunnel).
+The system follows a microservices-inspired architecture, containerized using Docker. All services are orchestrated via Docker Compose and sit behind an Nginx reverse proxy (serving the frontend).
 
-## 🛠️ Tech Stack
+### Components
 
-### Frontend
--   **HTML5 / CSS3**: Vanilla implementation for maximum performance and control.
--   **JavaScript (ES6+)**: specialized modules for API handling, layout, and charts.
--   **Chart.js**: Interactive data visualization.
+1.  **Frontend (Nginx)**: Serves static assets (HTML/CSS/JS) and acts as the entry point, routing API requests to the backend.
+2.  **Backend (Node.js/Express)**: Core API service managing business logic, authentication, and database interactions.
+3.  **Database (PostgreSQL)**: Persistent storage for user data, transactions, and settings.
+4.  **Exporter (Python)**: Specialized microservice for generating Excel (`.xlsx`) reports from transaction data.
 
-### Backend
--   **Node.js & Express**: Robust REST API handling core logic.
--   **PostgreSQL**: Relational database for structured financial data.
--   **JWT**: Secure, stateless authentication.
+### Architecture Diagram
 
-### Microservices
--   **Exporter Service**: Python (Flask + Pandas) service dedicated to generating Excel reports.
-
-### DevOps & Infrastructure
--   **Docker & Docker Compose**: Full container orchestration.
--   **Nginx**: Reverse proxy for serving static files and routing API requests.
--   **GitHub Actions**: CI/CD pipeline for automated testing and deployment.
-
-## 📋 Prerequisites
-
--   [Docker Desktop](https://www.docker.com/products/docker-desktop) installed.
--   [Git](https://git-scm.com/) installed.
-
-## ⚡ Quick Start (Local Development)
-
-1.  **Clone the Repository**
-    ```bash
-    git clone https://github.com/yourusername/income-expense-app.git
-    cd income-expense-app
-    ```
-
-2.  **Start the Application**
-    ```bash
-    docker-compose up --build -d
-    ```
-
-3.  **Access the App**
-    Open your browser and navigate to: [http://localhost:1292](http://localhost:1292)
-
-4.  **Default User** (Optional)
-    You can register a new account on the login page.
-
-## 🚀 Deployment (Production)
-
-The application is configured for production deployment using `docker-compose.prod.yml`.
-
-1.  **Set Environment Variables**
-    Ensure your server has the required environment variables (Database credentials, JWT secret, etc.) set in a `.env` file or CI/CD secrets.
-
-2.  **Deploy Command**
-    ```bash
-    docker-compose -f docker-compose.prod.yml up --build -d
-    ```
-
-3.  **Cloudflare Tunnel (Optional)**
-    If using Cloudflare Tunnel, point your service to `http://<server-ip>:1292`.
-
-## 📂 Project Structure
-
+```mermaid
+graph TD
+    Client(Browser) -->|HTTP/80| Nginx[Frontend / Nginx]
+    
+    subgraph Docker Network
+        Nginx -->|/api| Backend[Backend API]
+        Backend -->|SQL| DB[(PostgreSQL)]
+        Backend -->|HTTP| Exporter[Exporter Service]
+        Exporter -->|SQL| DB
+    end
 ```
+
+## 📂 Repository Structure
+
+```text
 .
-├── backend/            # Node.js API Server
-├── frontend/           # Static HTML/CSS/JS Assets + Nginx Config
-├── exporter/           # Python Microservice for Excel Export
-├── db/                 # Database Initialization Scripts
-├── docker-compose.yml  # Local Development Config
-└── docker-compose.prod.yml # Production Configuration
+├── .github/workflows/   # CI/CD Pipeline Configuration
+│   └── deploy.yml       # Automated Build-Test-Push-Deploy Workflow
+├── backend/             # Node.js Express API
+│   ├── src/             # Source Code (Controllers, Models, Routes)
+│   ├── tests/           # Automated Tests (Jest)
+│   └── Dockerfile       # Backend Container Config
+├── frontend/            # Static Web Assets
+│   ├── nginx.conf       # Nginx Configuration
+│   └── Dockerfile       # Frontend Container Config
+├── exporter/            # Python Reporting Service
+│   ├── app.py           # Service Logic
+│   └── Dockerfile       # Exporter Container Config
+├── db/                  # Database
+│   └── init.sql         # Initial Schema Setup
+├── docs/                # Project Documentation
+├── docker-compose.yml   # Local Development Orchestration
+└── docker-compose.prod.yml # Production Orchestration
 ```
+
+## 🚀 CI/CD Pipeline
+
+The project uses **GitHub Actions** for continuous integration and deployment. The pipeline is strict and follows a specific sequence to ensure quality.
+
+### Pipeline Stages
+
+1.  **Build**: Compiles Docker images for all services to ensure they are buildable. Uses Docker layer caching for performance.
+2.  **Test**: Runs automated unit and integration tests on the backend. **The pipeline stops immediately if tests fail.**
+3.  **Push**: Re-builds (using cache) and pushes valid images to the **GitHub Container Registry (GHCR)**.
+4.  **Deploy**: Connects to the production server via SSH, pulls the new images from GHCR, and restarts the services using Docker Compose.
+
+### Failure Scenario
+
+We have implemented a specific scenario to demonstrate pipeline reliability. Detailed instructions on how to trigger a pipeline failure (to verify the "stop-on-fail" mechanism) can be found in [docs/FAILURE_SCENARIO.md](docs/FAILURE_SCENARIO.md).
+
+## ⚡ Manual Setup & Execution
+
+### Prerequisites
+
+-   [Docker & Docker Compose](https://www.docker.com/products/docker-desktop)
+-   [Git](https://git-scm.com/)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/stanislausryn/income-expense-app.git
+cd income-expense-app
+```
+
+### 2. Environment Configuration
+
+Create a `.env` file in the root directory (optional for local dev as defaults are provided in `docker-compose.yml`, but recommended for security):
+
+```env
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=incomeexpense
+JWT_SECRET=your_super_secret_key
+PORT=3000
+```
+
+### 3. Run Locally
+
+Start the entire stack using Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+-   **Frontend**: Access at `http://localhost:1292`
+-   **Backend API**: Access at `http://localhost:3000`
+-   **Database**: Port `5432`
+
+### 4. Run Tests
+
+To run the backend tests manually:
+
+```bash
+cd backend
+npm install
+npm test
+```
+
+## 🤝 Contributing
+
+1.  Fork the repository.
+2.  Create a feature branch (`git checkout -b feature/AmazingFeature`).
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4.  Push to the branch (`git push origin feature/AmazingFeature`).
+5.  Open a Pull Request.
 
 ---
-*Built for the "POROS Freepass 2026" Competition.*
+
+*Stanislaus | 2026*
