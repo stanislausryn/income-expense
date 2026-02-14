@@ -63,7 +63,7 @@ The project uses **GitHub Actions** for continuous integration and deployment. T
 
 ### Failure Scenario
 
-We have implemented a specific scenario to demonstrate pipeline reliability. Detailed instructions on how to trigger a pipeline failure (to verify the "stop-on-fail" mechanism) can be found in [docs/FAILURE_SCENARIO.md](docs/FAILURE_SCENARIO.md).
+We have implemented a specific scenario to demonstrate pipeline reliability.
 
 ## ⚡ Manual Setup & Execution
 
@@ -112,15 +112,6 @@ cd backend
 npm install
 npm test
 ```
-
-## 🤝 Contributing
-
-1.  Fork the repository.
-2.  Create a feature branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
-
 ---
 
 *Stanislaus | 2026*
