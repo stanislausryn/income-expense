@@ -44,7 +44,7 @@ graph TD
 │   ├── app.py           # Service Logic
 │   └── Dockerfile       # Exporter Container Config
 ├── db/                  # Database
-│   └── init.sql         # Initial Schema Setup
+│   └── init.sql         # Initial Scheme Setup
 ├── docs/                # Project Documentation
 ├── docker-compose.yml   # Local Development Orchestration
 └── docker-compose.prod.yml # Production Orchestration
