@@ -114,6 +114,5 @@ cd backend
 npm install
 npm test
 ```
----
 
 *Stanislaus | 2026*
