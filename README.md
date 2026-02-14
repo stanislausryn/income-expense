@@ -63,7 +63,9 @@ The project uses **GitHub Actions** for continuous integration and deployment. T
 
 ### Failure Scenario
 
-We have implemented a specific scenario to demonstrate pipeline reliability.
+We have implemented a specific scenario to demonstrate pipeline reliability. The pipeline is designed to **fail and stop immediately** if any test in the `Test` stage fails.
+
+For detailed instructions on how to trigger and verify this behavior, please refer to the [Failure Scenario Documentation](docs/FAILURE_SCENARIO.md).
 
 ## ⚡ Manual Setup & Execution
 

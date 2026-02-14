@@ -39,7 +39,7 @@ const pool = new Pool({
       CREATE TABLE IF NOT EXISTS transactions (
         id SERIAL PRIMARY KEY,
         user_id INT NOT NULL,
-        type VARCHAR(10) NOT NULL, -- 'income' or 'expense'
+        type VARCHAR(10) NOT NULL,
         amount INT NOT NULL,
         category VARCHAR(50) NOT NULL,
         account VARCHAR(50),
@@ -95,7 +95,6 @@ function authMiddleware(req, res, next) {
   }
 }
 
-
 app.get("/", (req, res) => {
   res.json({ message: "Backend running!" });
 });
@@ -141,7 +140,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-
 app.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -166,7 +164,6 @@ app.post("/register", async (req, res) => {
     res.status(500).json({ error: "Registration failed" });
   }
 });
-
 
 app.post("/reset", authMiddleware, async (req, res) => {
   try {

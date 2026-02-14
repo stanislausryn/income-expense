@@ -282,7 +282,6 @@ document.getElementById("txForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   if (!selectedDate && !startDate) {
-    // Default to today if nothing selected
     const now = new Date();
     selectedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   }
@@ -293,7 +292,6 @@ document.getElementById("txForm").addEventListener("submit", async (e) => {
   const account = document.getElementById("account").value;
   const note = document.getElementById("note").value;
 
-  // Use selectedDate for the payload
   await apiFetch("/transactions", {
     method: "POST",
     body: JSON.stringify({ type, amount, category, note, date: selectedDate || startDate, account }),
@@ -346,17 +344,14 @@ async function setupMonthYearDropdown() {
     monthSelect.appendChild(option);
   });
 
-  // Set current month
   monthSelect.value = now.getMonth();
 
   function updateCalendar() {
     const y = parseInt(yearSelect.value);
     const m = parseInt(monthSelect.value);
 
-    // FORMAT: YYYY-MM
     selectedMonth = `${y}-${String(m + 1).padStart(2, "0")}`;
 
-    // Clear selections when month changes
     selectedDate = "";
     startDate = "";
     endDate = "";
@@ -365,23 +360,19 @@ async function setupMonthYearDropdown() {
 
     generateCalendar(y, m, onCalendarDateSelect, "calendar");
 
-    // Load data for this month
     refresh();
   }
 
   monthSelect.addEventListener("change", updateCalendar);
   yearSelect.addEventListener("change", updateCalendar);
 
-  // Initial load
   updateCalendar();
 }
 
-// Simplified date comparison since backend now guarantees YYYY-MM-DD string
 function loadTransactions() {
   let url = `/transactions`;
   if (selectedMonth) url += `?month=${selectedMonth}`;
 
-  // Use the cached function or define it
   const fetchAndRender = async () => {
     const res = await apiFetch(url);
     if (!res.ok) return;
@@ -393,7 +384,6 @@ function loadTransactions() {
     statusEl.textContent = "";
 
     if (selectedDate) {
-      // Strict string comparison
       filteredData = apiData.filter(t => t.date === selectedDate);
       statusEl.textContent = `Showing transactions for: ${selectedDate}`;
     } else if (startDate && endDate) {
@@ -416,7 +406,6 @@ function loadTransactions() {
       const amountClass = isIncome ? 'green' : 'red';
       const sign = isIncome ? '+' : '-';
 
-      // formatDate with includeTime = false
       li.innerHTML = `
         <div class="tx-info">
           <h4>${t.category}</h4>
@@ -429,7 +418,7 @@ function loadTransactions() {
       list.appendChild(li);
     });
 
-    updateCharts(apiData); // Charts always use full month data
+    updateCharts(apiData);
   };
 
   fetchAndRender();
